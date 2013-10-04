@@ -223,6 +223,8 @@ class UserController
     exitIfNotFound($con, $search);
     $result = ldap_get_entries($con, $search);
 
+	$input = json_decode(file_get_contents("php://input"), true);
+    $firsttime = $input['ft'];
     $pass = self::generatePassword(); 
     mt_srand((double)microtime()*1000000);
     $salt = pack("CCCCCCCC", mt_rand(), mt_rand(), mt_rand(), mt_rand(), mt_rand(), mt_rand(), mt_rand(), mt_rand());
@@ -243,6 +245,29 @@ class UserController
     } else {
       $output["password"]=$pass;
       echo json_encode($output);
+	  if(ft){
+	   $userEmail = <<<EOT
+Welcome to GeekSoc $firstname!
+
+You may find your new account details below, but please change your password at http://accounts.geeksoc.org/ as soon as possible.
+
+Username: $username
+Password: $pass
+
+You may login to the shell server via SSH at shell.geeksoc.org on port 22. IRC may be found at irc.geeksoc.org on port 6667 - #geeksoc is the official channel.
+
+On Windows the program PuTTY may be used to login to the SSH server, while Mac/Linux users will already have SSH installed and may connect using the 'ssh' command from a terminal.
+
+The recommended way of accessing IRC is setting up a persistent connection on Shell using screen and irssi, see http://quadpoint.org/articles/irssi for details on how to set this up.
+
+You can access your @geeksoc.org email account at http://webmail.geeksoc.org/ or by setting up your email client to use mail.geeksoc.org.
+
+Have fun, but please be responsible and abide with the terms of service.
+
+GeekSoc
+http://www.geeksoc.org/
+EOT;
+	  }else{
       $mailmessage = <<<EOT
 Your GeekSoc password has been reset by an administrator.
 
@@ -252,7 +277,7 @@ New Password: $pass
 GeekSoc
 http://www.geeksoc.org/
 EOT;
-
+}
       mailNotify($result[0]['mail'][0], "[GeekSoc] Your password has been reset", $mailmessage);
 
       $user = $_SERVER['PHP_AUTH_USER'];
