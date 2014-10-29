@@ -472,17 +472,24 @@ EOT;
   }
   
   static public function computeExpiry($now) {
+    $nextYear = date("Y") + 1;
 	
-    $nextExpiry = strtotime('first Friday of October', $now);
-    $threshold = strtotime('last Friday of May', $now);
-      
-	  if ($now < $threshold) {
-		  $expiry = $nextExpiry;
-	  } else {
-		 $expiry = strtotime('first Friday of October', $now + 365 * 24 * 60 * 60);
-	 }
-   $expiry = $expiry/(24 * 60 * 60);
-	 return $expiry;        
+    $nextExpiryString = 'first Friday of October';
+    $thresholdString = 'last Friday of May';
+
+    $nextExpiry = strtotime($nextExpiryString, $now);
+    $threshold = strtotime($thresholdString, $now);
+    
+    if ($now < $threshold) {
+      $expiry = $nextExpiry;
+    } else {
+      $expiry = strtotime("$nextExpiryString $nextYear", $now);
+    }
+
+    // This seems to do the trick.
+    $expiry = $expiry/(24 * 60 * 60) + 1;
+
+    return $expiry;        
   }
   
   static private function getGroupsForUser($con, $user) {
