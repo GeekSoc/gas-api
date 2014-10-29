@@ -472,17 +472,25 @@ EOT;
   }
   
   static public function computeExpiry($now) {
-	
-    $nextExpiry = strtotime('first Friday of October', $now);
-    $threshold = strtotime('last Friday of May', $now);
-      
-	  if ($now < $threshold) {
-		  $expiry = $nextExpiry;
-	  } else {
-		 $expiry = strtotime('first Friday of October', $now + 365 * 24 * 60 * 60);
-	 }
-   $expiry = $expiry/(24 * 60 * 60);
-	 return $expiry;        
+    $thisYear = date("Y", $now);
+    $nextYear = $thisYear + 1;
+
+    $newYearsDay = mktime(0, 0, 0, 1, 1, $thisYear);
+    $hogmanay = mktime(0, 0, 0, 12, 31, $thisYear);
+    $threshold = strtotime("last Friday of May $thisYear");
+    
+    $nextExpiryString = 'first Friday of October';
+    
+    if ($now >= $newYearsDay and $now < $threshold) {
+      $nextExpiryString .= " $thisYear";
+    } else {
+      $nextExpiryString .= " $nextYear";
+    }
+    
+    $expiry = strtotime($nextExpiryString, $now);
+    $expiry = $expiry/(24 * 60 * 60); // one day
+
+    return $expiry;
   }
   
   static private function getGroupsForUser($con, $user) {
